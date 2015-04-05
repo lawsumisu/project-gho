@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<link rel="stylesheet" type="text/css" href="scroller.css" />
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<title>Pause Scroller</title>
+<script type="text/javascript" src="external_js/jquery-1.9.0.min.js"></script>
+<script type="text/javascript" src="scroller.js"></script>
+
+<script>
+	$(document).ready(function() {
+		setup();
+	});
+</script>
+</head>
+
+<body>
+	<div id = "content">
+		<div id= "thumb"> </div>
+		<canvas id="scrollBG" width = "200" height = "75"></canvas>
+		<canvas id="scrollFG" width = "200" height = "75"></canvas>
+	</div>
+</body>
+</html>

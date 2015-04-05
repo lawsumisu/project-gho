@@ -1,0 +1,16 @@
+#thumb{
+	position: absolute;
+	background: blue;
+	width: 30px;
+	height: 30px;
+}
+
+#content{
+	position: relative;
+}
+#scrollFG{
+	z-index: -5;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+}
