@@ -52,7 +52,7 @@ var drawScrollBar = function(){
     var ctx = canvas.getContext('2d');
     var scroll = $("#scrollBG");
     var topCurveAnchors = [new Point(20,25), new Point(scroll.width()-20, 25)]
-    ctx.fillStyle = "rgb(126,126,126)";
+    ctx.fillStyle = "#cccccc";
     ctx.clearRect(0,0,scroll.width(), scroll.height());    
     //ctx.fillRect(0,0, scroll.width(), scroll.height());
    	//Draw curved arc.
@@ -62,7 +62,7 @@ var drawScrollBar = function(){
     var P = new Point(scroll.width()-20, 25);
     var V = new Vector(new Point(120,0), new Point(scroll.width()-20, 25));
     console.log(V.angle(V.perpendicular()));
-    var radius = 15;
+    var radius = 20;
     var circleCenter = P.move(V.normalized().perpendicular(), radius);
     var P3 = P.move(V.normalized().perpendicular(), radius*2);
     var angle = Math.atan2(25, scroll.width()-140) - Math.PI/2;
