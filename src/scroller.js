@@ -81,6 +81,9 @@ var drawScrollBar = function(){
 }
 
 var setUpScroller = function(){
+	//Get canvas for BG Pixel data.
+	var data  = document.getElementById("scrollBG").getContext("2d").getImageData(0,0,$("#scrollBG").width(), $("#scrollBG").height());
+	console.log(data);
 	var thumb = $("#thumb");
 	var size = thumb.width();
 	var lastX = null;
@@ -100,7 +103,15 @@ var setUpScroller = function(){
 			lastY = null;
 			var x = e.pageX  - scroll.offset().left - size/2;
 	  		var y = e.pageY  - scroll.offset().top - size/2;
-	  		drawThumb(x-offsetX, y-offsetY, size);
+	  		var boundedX = clamp(x-offsetX+size/2, size/2, scroll.width()-size/2);
+	  		var boundedY = clamp(y-offsetY+size/2, size/2, scroll.height()-size/2);
+	  		var pixel = getPixel(data.data, 200, boundedX,boundedY);
+	  		//console.log(pixel);
+	  		if (pixel.a != 0){
+	  			//Only allow mouse movement if the background pixel has a visible value.
+	  			drawThumb(x-offsetX, y-offsetY, size);
+	  		}
+	  		
 		});
 
 		scroll.mouseleave(function(e){			
@@ -129,7 +140,15 @@ var setUpScroller = function(){
 	  })
 	});
 }
-
+var getPixel = function(pixelData, width, x,y){
+	var i = (y * width + x) * 4;
+	var canvas = document.getElementById("scrollFG");
+    var ctx = canvas.getContext('2d');
+    // var size = 5;
+    // ctx.fillStyle =  "#f00";
+    // ctx.fillRect(x-size/2,y-size/2,size,size);
+	return {r: pixelData[i], g:pixelData[i+1], b:pixelData[i+2], a:pixelData[i+3]};
+}
 var drawThumb = function(x, y, size){
 	var scroll =  $("#scrollFG");
 	var canvas = document.getElementById("scrollFG");
