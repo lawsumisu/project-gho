@@ -1,4 +1,210 @@
 //Javascript for scroll bar here!
+
+/**
+ * Sets up the scroll bar and thumb.
+ */
+var setup = function(){
+	var B = drawScrollBar(200, 100, 20);
+	setUpThumb(B,30);
+}
+
+/**
+ * Draws the curved track for the scroll bar.
+ * This scroll bar extends across the width of the containing canvas +/- some horizontal padding.
+ * @param  {[int]} width  [width of the canvases that contain the scroll bar.]
+ * @param  {[int]} height [height of the canvases the contain the scroll bar.]
+ * @param  {[float]} radius [radius of the curved ends of the scrollbar]
+ * @return {[Bezier]}        [Bezier curve that the constrains the path of the scroll thumb]
+ */
+var drawScrollBar = function(width, height, radius){
+	//Set up dimensions of canvases.
+	var scrollBG = $("#scrollBG");
+	scrollBG.attr("width",width);
+	scrollBG.attr("height", height);
+	var scrollFG = $("#scrollFG");
+	scrollFG.attr("width",width);
+	scrollFG.attr("height", height);
+
+	var paddingX = radius+5;
+	var paddingY = (height-radius)/2;
+	var anchorHeight = height/4;
+	var B1 = new Bezier(new Point(paddingX,paddingY), width-paddingX*2, anchorHeight);
+	var canvas = document.getElementById("scrollBG");
+    var ctx = canvas.getContext('2d');
+
+    ctx.fillStyle = "#cccccc";
+    ctx.clearRect(0,0,width, height);  
+    ctx.strokeRect(0,0,width, height);  
+    //ctx.fillRect(0,0, scroll.width(), scroll.height());
+   	//Draw curved arc.
+   	ctx.beginPath();
+    ctx.moveTo(B1.p1.x,B1.p1.y);
+    B1.drawCurve(ctx);
+    var V = new Vector(B1.p3, B1.p4);
+    var C1 = B1.p4.move(V.normalized().perpendicular(), radius);
+    var P2 = B1.p4.move(V.normalized().perpendicular(), radius*2);
+    var angle = Math.atan2(V.y, V.x) - Math.PI/2;
+    //ctx.lineTo(newP.x, newP.y);
+    ctx.arc(C1.x, C1.y, radius, angle, angle+Math.PI);
+    var V2 = new Vector(B1.p1, B1.p2);
+    var P3 = (B1.p1).move(V2.normalized().perpendicular(), radius*2);
+    var C2 = (B1.p1).move(V2.normalized().perpendicular(), radius);
+    var B2 = new Bezier(P2, P3.x-P2.x, anchorHeight);
+    console.log(B2.toString());
+    B2.drawCurve(ctx);
+    //ctx.lineTo(20, 25);
+    var diff = Math.PI/2-Math.atan2(V.y, V.x);
+    var angle2 = angle+2*diff;
+    ctx.arc(C2.x, C2.y, radius,  angle2, angle2 + Math.PI);
+    ctx.fill();
+    ctx.moveTo(C2.x, C2.y);
+    var B3 = new Bezier(C2, C1.x-C2.x, anchorHeight);
+    //B3.drawCurve(ctx);
+    ctx.stroke();
+    //ctx.fill();
+    return B3;
+}
+
+/**
+ * Draws the scrolling thumb and adds listeners for motion tracking.
+ * @param {[Bezier]} B      [Bezier curve that this thumb's motion is constrained to]
+ * @param {[float]} radius [radius of thumb]
+ */
+var setUpThumb = function(B, radius){
+	//Get canvas for BG Pixel data.
+	var thumb = $("#thumb");
+	var scroll = $("#scrollFG");
+	var lastX = null;
+	var lastY = null;
+	drawThumb(0,0,B,radius);
+	scroll.mousedown(function(e){
+		var data  = document.getElementById("scrollFG").getContext("2d").getImageData(0,0,$("#scrollBG").width(), $("#scrollBG").height()).data;
+		//$(this).css("visibility", "hidden");
+		scroll.css("z-index", 2);
+		var x = e.pageX  - scroll.offset().left;
+	  	var y = e.pageY  - scroll.offset().top;
+	  	// var offsetX = e.pageX - $(this).offset().left - radius;
+	  	// var offsetY  = e.pageY - $(this).offset().top - radius;
+	  	var pixel = getPixel(data, scroll.width(), x,y);
+	  	if (pixel.a == 0) return;
+	  	drawThumb(x, y, B, radius);
+
+		scroll.mousemove(function(e){
+			lastX = e.pageX  - scroll.offset().left;
+	  		lastY = e.pageY  - scroll.offset().top;
+	  		drawThumb(lastX, lastY, B, radius);
+	  		
+		});
+
+		scroll.mouseleave(function(e){			
+			lastX = e.pageX  - scroll.offset().left;
+	  		lastY = e.pageY  - scroll.offset().top;
+	  		drawThumb(lastX, lastY, B, radius);
+			//drawThumb(lastX, lastY, radius);
+		});
+		$(window).mouseup(function(e){
+	        var x = e.pageX  - scroll.offset().left;
+	        var y = e.pageY  - scroll.offset().top;
+	        //scroll.css("z-index", -5);
+	        scroll.off("mousemove");
+	        scroll.off("mouseleave");
+	        $(this).off("mouseup");
+	        // thumb.css("visibility", "visible");
+	        // if (lastX != null){
+	        // 	setThumb(lastX, lastY);
+	        // }
+	        // else{
+	        // 	setThumb(x-offsetX, y-offsetY);
+	        // }
+	       	animateThumb(lastX,lastY,B, radius); 
+	        lastX = null;
+			lastY = null;
+	  })
+	});
+}
+/**
+ * Gets pixel information of the foreground canvas at a specified location.
+ * @param  {[Array]} pixelData [1-D array of pixel data.]
+ * @param  {[int]} x         [x-coordinate of pixel location]
+ * @param  {[int]} y         [y-coordinate of pixel location]
+ * @return {[Pixel]}           [Pixel object if location if valid, undefined otherwise]
+ */
+var getPixel = function(pixelData, width, x,y){
+	var i = (y * $("#scrollFG").width() + x) * 4;
+	var canvas = document.getElementById("scrollFG");
+    var ctx = canvas.getContext('2d');
+	return new Pixel(pixelData[i], pixelData[i+1], pixelData[i+2], pixelData[i+3]);
+}
+
+/**
+ * Draws the scrolling thumb with respect to a specified location.
+ * If the input coordinates do not fall along the curve, they are mapped to a location on the curve.
+ * @param  {[int]} x      [description]
+ * @param  {[int]} y      [description]
+ * @param  {[Bezier]} B      [Bezier curve that this thumb's motion is constrained to]
+ * @param  {[float]} radius [radius of thumb]
+ */
+var drawThumb = function(x, y, B, radius){
+	var t = B.getT(new Point(x,y));
+	drawThumbAtT(B, t, radius);
+}
+
+var drawThumbAtT = function(B, t, radius){
+	var L = B.locationAt(clamp(t, 0, 1));
+	var scroll =  $("#scrollFG");
+	var canvas = document.getElementById("scrollFG");
+	var ctx = canvas.getContext("2d"); 
+	ctx.clearRect(0,0, scroll.width(), scroll.height());
+	ctx.beginPath();
+	ctx.arc(L.x, L.y, radius, 0, 2 * Math.PI, false);
+	ctx.fillStyle = 'green';
+	ctx.fill();
+	ctx.lineWidth = 5;
+	ctx.strokeStyle = '#003300';
+	ctx.stroke(); 
+}
+
+/**
+ * Animate the thumb moving towards one of the ends of the scroll bar (whichever is closer).
+ * @param  {[type]} x      [description]
+ * @param  {[type]} y      [description]
+ * @param  {[type]} B      [description]
+ * @param  {[type]} radius [description]
+ * @return {[type]}        [description]
+ */
+var animateThumb = function(x, y, B, radius){
+	var t = B.getT(new Point(x,y));
+	var delta = -.01;
+	if (t > .5){
+		delta *= -1;
+	}
+	var id = setInterval(function(){
+		t += delta;
+		if (t <= 0 || t >= 1){
+			clearInterval(id);
+		}
+		drawThumbAtT(B, t, radius);
+	}, 5);
+	t += delta;
+	drawThumbAtT(B,t, radius);
+}
+
+/**
+ * Clamps a value between a min and a max value.
+ * @param  {[float]} value [value to clamp]
+ * @param  {[float]} min   [min value to clamp with]
+ * @param  {[float]} max   [max value to clamp with]
+ * @return {[float]}       [clamped value]
+ */
+var clamp = function(value, min, max){
+	return Math.min(Math.max(min, value), max);
+}
+
+//===================================================================
+//							Helper Classes
+//===================================================================
+
+
 var Point = function(x,y){
 	this.x =x;
 	this.y = y;
@@ -8,8 +214,15 @@ var Point = function(x,y){
 		return this.add(new Point(dV.x, dV.y));
 	}
 
+	this.multiply = function(f){
+		return new Point(f*x, f*y);
+	}
 	this.add = function(P){
 		return new Point(this.x+P.x, this.y+P.y);
+	}
+
+	this.toString = function(){
+		return "Point [" + this.x + "," + this.y + "]";
 	}
 }
 
@@ -39,138 +252,38 @@ var Vector = function(p1, p2){
 	}
 	this.toString = function(){
 		return "Vector <" +this.x + "," +this.y +">";
+	}	
+}
+
+var Bezier = function(p1, anchorWidth, anchorHeight){
+	var horizontalSpacing = anchorWidth/3;
+	this.p1 = new Point(p1.x, p1.y);
+	this.p2 = new Point(p1.x+horizontalSpacing, p1.y - anchorHeight);
+	this.p3 = new Point(p1.x+horizontalSpacing*2, p1.y - anchorHeight);
+	this.p4 = new Point(p1.x+horizontalSpacing*3, p1.y);
+
+	this.drawCurve = function(ctx){
+		ctx.bezierCurveTo(this.p2.x,this.p2.y,this.p3.x,this.p3.y,this.p4.x,this.p4.y);
 	}
-
-	
-}
-var setup = function(){
-	drawScrollBar();
-	setUpScroller();
-}
-var drawScrollBar = function(){
-	var canvas = document.getElementById("scrollBG");
-    var ctx = canvas.getContext('2d');
-    var scroll = $("#scrollBG");
-    var topCurveAnchors = [new Point(20,25), new Point(scroll.width()-20, 25)]
-    ctx.fillStyle = "#cccccc";
-    ctx.clearRect(0,0,scroll.width(), scroll.height());    
-    //ctx.fillRect(0,0, scroll.width(), scroll.height());
-   	//Draw curved arc.
-   	ctx.beginPath();
-    ctx.moveTo(20,25);
-    ctx.bezierCurveTo(60,0,120,0,scroll.width()-20,25);
-    var P = new Point(scroll.width()-20, 25);
-    var V = new Vector(new Point(120,0), new Point(scroll.width()-20, 25));
-    console.log(V.angle(V.perpendicular()));
-    var radius = 20;
-    var circleCenter = P.move(V.normalized().perpendicular(), radius);
-    var P3 = P.move(V.normalized().perpendicular(), radius*2);
-    var angle = Math.atan2(25, scroll.width()-140) - Math.PI/2;
-    //ctx.lineTo(newP.x, newP.y);
-    ctx.arc(circleCenter.x, circleCenter.y, radius, angle, angle+Math.PI);
-    var V2 = new Vector(new Point(20, 25), new Point(60,0));
-    var P3 = (new Point(20,25)).move(V2.normalized().perpendicular(), radius*2);
-    var M2 = (new Point(20,25)).move(V2.normalized().perpendicular(), radius);
-    ctx.bezierCurveTo(120,45,60,45,P3.x,P3.y);
-    //ctx.lineTo(20, 25);
-    var diff = Math.PI/2-Math.atan2(25, scroll.width()-140);
-    var angle2 = angle+2*diff;
-    ctx.arc(M2.x, M2.y, radius,  angle2, angle2 + Math.PI);
-    ctx.stroke();
-    ctx.fill();
+	this.locationAt = function(t){
+		T1 = this.p1.multiply(Math.pow(1-t, 3));
+		T2 = this.p2.multiply(3*Math.pow(1-t,2)*t);
+		T3 = this.p3.multiply(3*(1-t)*Math.pow(t,2));
+		T4 = this.p4.multiply(Math.pow(t,3));
+		return new Point(T1.x+T2.x+T3.x+T4.x, T1.y+T2.y+T3.y+T4.y);
+	}
+	this.getT = function(P){
+		var length = this.p4.x-this.p1.x;
+		return clamp((P.x-this.p1.x)/length, 0, 1);
+	}
+	this.toString = function(){
+		return "Bezier: " + this.p1.toString() + ", " + this.p2.toString() + ", " + this.p3.toString() + ", " + this.p4.toString();
+ 	}
 }
 
-var setUpScroller = function(){
-	//Get canvas for BG Pixel data.
-	var data  = document.getElementById("scrollBG").getContext("2d").getImageData(0,0,$("#scrollBG").width(), $("#scrollBG").height());
-	console.log(data);
-	var thumb = $("#thumb");
-	var size = thumb.width();
-	var lastX = null;
-	var lastY = null;
-	thumb.mousedown(function(e){
-		$(this).css("visibility", "hidden");
-		var scroll = $("#scrollFG");
-		scroll.css("z-index", 2);
-		var x = e.pageX  - scroll.offset().left - size/2;
-	  	var y = e.pageY  - scroll.offset().top - size/2;
-	  	var offsetX = e.pageX - $(this).offset().left - size/2;
-	  	var offsetY  = e.pageY - $(this).offset().top - size/2;
-	  	drawThumb(x-offsetX, y-offsetY, size);
-
-		scroll.mousemove(function(e){
-			lastX = null;
-			lastY = null;
-			var x = e.pageX  - scroll.offset().left - size/2;
-	  		var y = e.pageY  - scroll.offset().top - size/2;
-	  		var boundedX = clamp(x-offsetX+size/2, size/2, scroll.width()-size/2);
-	  		var boundedY = clamp(y-offsetY+size/2, size/2, scroll.height()-size/2);
-	  		var pixel = getPixel(data.data, 200, boundedX,boundedY);
-	  		//console.log(pixel);
-	  		if (pixel.a != 0){
-	  			//Only allow mouse movement if the background pixel has a visible value.
-	  			drawThumb(x-offsetX, y-offsetY, size);
-	  		}
-	  		
-		});
-
-		scroll.mouseleave(function(e){			
-			var x = e.pageX  - scroll.offset().left - size/2;
-	  		var y = e.pageY  - scroll.offset().top - size/2;
-	  		lastX = x-offsetX;
-			lastY = y-offsetY;
-			drawThumb(lastX, lastY, size);
-		});
-		$(window).mouseup(function(e){
-	        var x = e.pageX  - scroll.offset().left - size/2;
-	        var y = e.pageY  - scroll.offset().top - size/2;
-	        scroll.css("z-index", -5);
-	        scroll.off("mousemove");
-	        scroll.off("mouseleave");
-	        $(this).off("mouseup");
-	        thumb.css("visibility", "visible");
-	        if (lastX != null){
-	        	setThumb(lastX, lastY);
-	        }
-	        else{
-	        	setThumb(x-offsetX, y-offsetY);
-	        } 
-	        lastX = null;
-			lastY = null;
-	  })
-	});
-}
-var getPixel = function(pixelData, width, x,y){
-	var i = (y * width + x) * 4;
-	var canvas = document.getElementById("scrollFG");
-    var ctx = canvas.getContext('2d');
-    // var size = 5;
-    // ctx.fillStyle =  "#f00";
-    // ctx.fillRect(x-size/2,y-size/2,size,size);
-	return {r: pixelData[i], g:pixelData[i+1], b:pixelData[i+2], a:pixelData[i+3]};
-}
-var drawThumb = function(x, y, size){
-	var scroll =  $("#scrollFG");
-	var canvas = document.getElementById("scrollFG");
-	var ctx = canvas.getContext("2d");
-	ctx.clearRect(0,0, scroll.width(), scroll.height());
-	ctx.fillStyle = "rgb(0,0,255)"; 
-	var boundedX = clamp(x, 0, scroll.width()-size);
-	var boundedY = clamp(y, 0, scroll.height()-size);   
-	ctx.fillRect(boundedX,boundedY, size, size);
-	//ctx.drawImage(checkerImg, x, y, size, size );
-}
-
-var setThumb = function(x, y){
-	var scroll =  $("#scrollBG");
-	var thumb = $("#thumb");
-	var size = thumb.width();
-	var boundedX = clamp(x, 0, scroll.width()-size);
-	var boundedY = clamp(y, 0, scroll.height()-size); 
-	thumb.css("left", boundedX);
-	thumb.css("top",boundedY);
-}
-
-var clamp = function(value, min, max){
-	return Math.min(Math.max(min, value), max);
+var Pixel = function(r, g, b, a){
+	this.r = r;
+	this.g = g;
+	this.b = b;
+	this.a = a;
 }

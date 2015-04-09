@@ -9,7 +9,7 @@
 	position: relative;
 }
 #scrollFG{
-	z-index: -5;
+	z-index: 2;
 	position: absolute;
 	top: 0px;
 	left: 0px;
