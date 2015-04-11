@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+
+<!--
+  GR4 stuff
+
+  //ask user to set sleep on phone to 30 min 
+  //
+-->
+<html>
+
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+
+<!-- Load style sheets -->
+
+<link rel="stylesheet" type="text/css" href="running.css" />
+<!-- Load any supplemental Javascript libraries here -->
+<script type="text/javascript" src="external_js/jquery-1.9.0.min.js"></script>
+<link href="external_js/bootstrap-3.3.4-dist/css/bootstrap.min.css" rel="stylesheet">
+
+<script type="text/javascript" src="handlebars-v3.0.0.js"></script>
+
+<script type="text/javascript" src="scroller.js"></script>
+<link rel="stylesheet" type="text/css" href="scroller.css" />
+<script type="text/javascript">
+$(document).ready(function() {
+    setup();
+  });
+
+
+	//init function to draw rectangle
+	function init() {
+		var canvas = document.getElementById("canvas");
+		var context = canvas.getContext("2d");
+		context.fillStyle="red";
+		context.beginPath();
+		context.moveTo(100,410);
+		context.lineTo(500,10);
+		context.lineTo(900,410);
+		context.closePath();
+		context.fill();
+
+	}
+
+	onload=init;
+
+	//access gyroscope data 
+	if(window.DeviceMotionEvent){
+  		window.addEventListener('deviceorientation', function(event) {
+  			var alpha = event.alpha;
+  			var beta = event.beta;
+  			var gamma = event.gamma;
+
+  			//replace HTML
+
+
+        //values for 
+
+  			if ((alpha > 10 && alpha <= 100) && (beta > -80 && beta <= -50)) {
+          document.getElementById("timeHeading").innerHTML = ""; 
+          document.getElementById("distanceFooter").innerHTML = ""; 
+          
+          //document.body.innerHTML = "<img src='arrow.png' alt='HTML5 Icon' id='arrow' width='1000' height='500'>"; 
+  				//document.body.innerHTML = "<h2>minimal</h2><h2 id = 'accData'></h2>"; 
+
+          //document.body.innerHTML = "<canvas id='canvas' width='1400' height='500'></canvas>"; 
+
+  				//document.body.innerHTML = "<h1>running, minimal orientation</h1>";
+  				//document.body.innerHTML = "<canvas id=&quot;canvas&quot; width=&quot;1400&quot; height=&quot;500&quot; ></canvas>";  
+  			} else if ((alpha > 0 && alpha <= 60) && (beta > -60 && beta <= -20)) {
+          document.getElementById("timeHeading").innerHTML = "Intermediate"; 
+  				//document.body.innerHTML = "<h2>intermediate</h2><h2 id = 'accData'></h2>"; 
+  				//document.body.innerHTML = "<h1>running, transition orientation</h1>"; 
+  				//document.body.innerHTML = "<h1>11:01:11</h1><img src='arrow.png' id='arrow' alt='HTML5 Icon' width='1000' height='500'><h1>2.5 mi</h1>"; 
+  			} else if (((alpha > 0 && alpha <= 10) || (alpha > 260 && alpha <= 360)) && (beta > -50 && beta <= 0)) {
+          document.getElementById("timeHeading").innerHTML = "Full"; 
+  				//document.body.innerHTML = "<h2>full screen mode: 11:01:11</h2> <img src='arrow.png' id='arrow' alt='HTML5 Icon' width='1000' height='500'><h2>2.5 mi</h2>"; 
+          //document.body.innerHTML = "<h2>full</h2><h2 id = 'accData'></h2>"; 
+  				//document.body.innerHTML = "<h1>full screen orientation</h1><canvas id=&quot;canvas&quot; width=&quot;1400&quot; height=&quot;500&quot; ></canvas><h2 id = &quot;accData&quot;></h2> <h1>2.5 mi</h1>"; 
+  			} else {
+  				//document.body.innerHTML = "<h1>No specific orientation: specify range</h1>"; 
+          //document.body.innerHTML = "<h2>no orientation</h2><h2 id = 'accData'></h2>"; 
+  			}
+  			
+  			document.getElementById("accData").innerHTML = alpha.toString() + " " + beta.toString() + " " + gamma.toString();  
+		}, false);
+	} else {	
+  		console.log("Device does not support gyroscope data access.");
+  	}
+
+
+
+</script>
+
+
+</head>
+
+	<body>
+		<h1 id = "timeHeading">11:01:11</h1> 
+    <!-- <canvas id="canvas" width="1400" height="500" ></canvas> -->
+    <img src='arrow.png' id='arrow' alt='HTML5 Icon' width='1000' height='500'>
+     <!-- <h2 id = "accData"></h2> <h1>2.5 mi</h1> --> 
+     <h2 id = "distanceFooter">2.5 mi</h2>
+     <div id = "content">
+    <canvas id="scrollBG" width = "200" height = "75"></canvas>
+    <canvas id="scrollFG" width = "200" height = "75"></canvas>
+  </div>
+	</body>
+ 
+</html>
