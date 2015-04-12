@@ -1,0 +1,61 @@
+html {
+         
+}
+
+h1 {
+        font-size: 35vw;
+        font-family: 'Open Sans', sans-serif;
+        font-weight: 800;
+      }
+      .green {
+        color: #6EBF4E;
+      }
+      .gray {
+        color: #DDDDDD;
+      }
+
+h2 {
+  font-size: 20vw;
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 800;
+  
+}
+
+ button {
+        background-color: #99DE7E;
+      }
+      .tophalf {
+        margin-top: 30%;
+        margin-bottom: 30%;
+        text-align: center;
+      }
+      .buttonspacer {
+        margin-top: 10%;
+      }
+
+      .buttontop {
+        margin-top:15%;
+      }
+      
+      .buttonbottom {
+        margin-top:90%;
+      }
+
+      .buttonselect {
+        background-color: #63AC46;
+      }
+
+      .toplogo {
+        margin-top:5%;
+        margin-bottom:5%;
+        text-align: center;
+      }
+
+ input {
+   width: 30%;
+   text-align:right;
+   margin-right:3px;
+   margin-left:6px;
+ }
+
+/* Your CSS here */
