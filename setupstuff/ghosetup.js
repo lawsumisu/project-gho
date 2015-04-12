@@ -131,6 +131,7 @@ $("#distancebtn").on('click',function(){
 	SpinningWheel.addSlot(totalmiles, 'right');
 	SpinningWheel.addSlot({separator: '.'}, 'readonly shrink');
 	SpinningWheel.addSlot(totaldivisions, 'left');
+	SpinningWheel.addSlot({separator: 'mi'}, 'readonly shrink');
 	
 	SpinningWheel.setDoneAction(distanceDone);
 
@@ -139,7 +140,7 @@ $("#distancebtn").on('click',function(){
 
 
 function distanceDone() {
-	$("#distance")[0].value = SpinningWheel.getSelectedValues().values.join().replace(/,/g, '');
+	$("#distance")[0].value = SpinningWheel.getSelectedValues().values.join().replace(/,/g, '').slice(0,-2);
 	$("#forwardbtn").focus();
 }
 
@@ -165,6 +166,7 @@ $("#splitbtn").on('click',function(){
 	SpinningWheel.addSlot(splitmiles, 'right');
 	SpinningWheel.addSlot({separator: '.'}, 'readonly shrink');
 	SpinningWheel.addSlot(splitdivisions, 'left');
+	SpinningWheel.addSlot({separator: 'mi'}, 'readonly shrink');
 
 	SpinningWheel.setDoneAction(splitDone);
 
@@ -172,7 +174,7 @@ $("#splitbtn").on('click',function(){
 });
 
 function splitDone() {
-	$("#split")[0].value = SpinningWheel.getSelectedValues().values.join().replace(/,/g, '');
+	$("#split")[0].value = SpinningWheel.getSelectedValues().values.join().replace(/,/g, '').slice(0,-2);
 	$("#forwardbtn").focus();
 }
 
