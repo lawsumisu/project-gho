@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<!--
+   Set Up Portion of Gho Web App
+	@cwettwers
+   
+  -->
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" id="iphone-viewport" content="width=device-width, initial-scale=1 minimum-scale=1.0, maximum-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Gho Set Up</title>
+    <link type="text/css" href="bootstrap-3.3.4-dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link type="text/css" href="ghosetup.css" rel="stylesheet" />
+    <link type="text/css" href="sw/spinningwheel.css" rel="stylesheet" media="all" />
+
+    <script type="text/javascript" src="jquery/js/jquery-2.1.3.min.js"></script>
+    <script type="text/javascript" src="jquery/js/jquery-ui-1.10.0.custom.min.js"></script>
+    <script type="text/javascript" src="ghosetup.js"></script>
+    <script type="text/javascript" src="bootstrap-3.3.4-dist/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="sw/spinningwheel-min.js?v=1.4"></script>
+
+  </head>
+  <body>
+    <!-- Your HTML here -->
+<div class="container">
+<!--<div class="row toplogo">
+         <h2><span class="green">G</span><span class="gray">h</span><span class="green">o</span></h2>
+</div>-->
+<div id='distanceinput' class="row buttontop">
+	<div class="col-xs-10 col-xs-offset-1">
+		<button id="distancebtn" type="button" class="btn btn-lg btn-block">
+			Distance: <input type='text' id='distance' name='distance'/>mi
+		</button>
+	</div>
+</div>
+
+<div id='nodistanceinput' class="row buttonspacer">
+	<div class="col-xs-10 col-xs-offset-1">
+		<button id="nodistancebtn" type="button" class="btn btn-lg btn-block buttonselect">
+			No Distance
+		</button>
+	</div>
+</div>
+
+<div id='splitinput' class="row buttontop">
+	<div class="col-xs-10 col-xs-offset-1">
+		<button id="splitbtn" type="button" class="btn btn-lg btn-block">
+			Split Distance: <input type='text' id='split' name='split distance'/>mi
+		</button>
+	</div>
+</div>
+
+<div id='nosplitinput' class="row buttonspacer">
+	<div class="col-xs-10 col-xs-offset-1">
+		<button id="nosplitbtn" type="button" class="btn btn-lg btn-block buttonselect">
+			No Split Distance
+		</button>
+	</div>
+</div>
+
+<div id='paceinput' class="row buttontop">
+	<div class="col-xs-10 col-xs-offset-1">
+		<button id="pacebtn" type="button" class="btn btn-lg btn-block">
+			Pacing: <input type='text' id='pace' name='pace'/>min
+		</button>
+	</div>
+</div>
+
+<div id='nopaceinput' class="row buttonspacer">
+	<div class="col-xs-10 col-xs-offset-1">
+		<button id="nopacebtn" type="button" class="btn btn-lg btn-block buttonselect">
+			No Pacing
+		</button>
+	</div>
+</div>
+
+<div id='nav' class="row buttonbottom">
+	<div class="col-xs-6">
+		<button id="backbtn" type="button" class="btn btn-lg btn-block">
+			Back
+		</button>
+	</div>
+	<div class="col-xs-6">
+		<button id="forwardbtn" type="button" class="btn btn-lg btn-block buttonselect">
+			<span id='nexttext'>Next</span>
+			<span id='ghotext'><span class="black">G</span><span class="gray">h</span><span class="black">o</span></span>
+		</button>
+	</div>
+</div>
+</div>	
+
+  </body>
+</html>
