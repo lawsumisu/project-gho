@@ -12,7 +12,7 @@ var setup = function(){
 	cachedHeight = $(window).height();
 
 	var w = cachedWidth;
-	var h = cachedHeight/4;	
+	var h = cachedHeight/3;	
 	var r= h/8;
 
 	var B = drawScrollBar(w, h, r);
@@ -69,7 +69,6 @@ var drawScrollBar = function(width, height, radius){
     var P3 = (B1.p1).move(V2.normalized().perpendicular(), radius*2);
     var C2 = (B1.p1).move(V2.normalized().perpendicular(), radius);
     var B2 = new Bezier(P2, P3.x-P2.x, anchorHeight);
-    console.log(B2.toString());
     B2.drawCurve(ctx);
     //ctx.lineTo(20, 25);
     var diff = Math.PI/2-Math.atan2(V.y, V.x);
