@@ -8,6 +8,7 @@
     <title>Gho</title>
 
     <link href="external_js/bootstrap-3.3.4-dist/css/bootstrap.min.css" rel="stylesheet">
+    <!--<link href="scroller.css" rel="stylesheet">-->
 
     <style type="text/css">
       .runningLabel {
@@ -27,6 +28,7 @@
 
       #overallInfoTable {
         margin-top: 10px;
+        margin-bottom: 10px;
       }
 
       .nav-tabs > li {
@@ -74,12 +76,15 @@
       }
 
       #leftButton, #exitButton {
-        position: fixed;
         width: 30%;
       }
 
       #exitButton {
         float: right;
+      }
+
+      .container {
+        margin-top: 15px;
       }
 
     </style>
@@ -88,16 +93,23 @@
     <div class="container">
       <div class="row">
         <div class="col-xs-12">
+          <button class="btn btn-lg" id="leftButton"></button>
+          <button class="btn btn-lg" id="exitButton" onclick="location.href='index.html'">Exit</button>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-xs-12">
           <table class="table" id="overallInfoTable">
             <col width="50%">
             <col width="50%">
             <tr>
-              <td class="runningLabel text-right">Total Distance</td>
-              <td class="valueLabel text-left"><span id="totalDistLabel"></span> mi</td>
+              <td class="runningLabel text-left">Total Distance</td>
+              <td class="valueLabel text-right"><span id="totalDistLabel"></span> mi</td>
             </tr>
             <tr>
-              <td class="runningLabel text-right">Total Time</td>
-              <td class="valueLabel text-left"><span id="totalTimeLabel"></span></td>
+              <td class="runningLabel text-left">Total Time</td>
+              <td class="valueLabel text-right"><span id="totalTimeLabel"></span></td>
             </tr>
           </table>
         </div>
@@ -106,7 +118,7 @@
       <div class="row">
         <div class="col-xs-12">
           <div role="tabpanel">
-            <ul class="nav nav-tabs" role="tablist">
+            <ul id="tabs" class="nav nav-tabs" role="tablist">
               <li role="presentation"><a href="#graphDisplay" aria-controls="graph" role="tab" data-toggle="tab">Graph</a></li>
               <li role="presentation"><a href="#tableDisplay" aria-controls="table" role="tab" data-toggle="tab">Table</a></li>
             </ul>
@@ -129,9 +141,9 @@
       </div>
 
       <div class="row">
-        <div class="col-xs-12">
-          <button class="btn btn-lg" id="leftButton" style="display: none"></button>
-          <button class="btn btn-lg" id="exitButton" style="display: none" onclick="location.href='index.html'">Exit</button>
+        <div class="col-xs-12 content">
+          <canvas id="scrollBG" width="200" height="75"></canvas>
+          <canvas id="scrollFG" width="200" height="75"></canvas>
         </div>
       </div>
     </div>
@@ -140,6 +152,7 @@
     <script src="external_js/bootstrap-3.3.4-dist/js/bootstrap.min.js"></script>
     <script src="external_js/highcharts.js"></script>
     <script src="runs.js"></script>
+    <script src="scroller.js"></script>
     <script type="text/javascript">
 
         var url = location.href;
@@ -169,6 +182,21 @@
         var minutes = Math.floor(finalTime/60);
         var seconds = finalTime % 60;
         $('#totalTimeLabel').text(minutes + ":" + ('0' + seconds).slice(-2));
+
+        // set up scrollbar
+        var scrollbar = drawScrollBar($("#scrollBG").parent().width()*.9, $("#scrollBG").parent().width()*.9/2, 20);
+        $("#scrollBG").css("margin-left",$("#scrollBG").parent().width()*.05 + "px");
+        $("#scrollFG").css("margin-left",$("#scrollBG").parent().width()*.05 + "px");
+        $("#scrollBG").css("bottom", "0px");
+        $("#scrollBG").css("position", "fixed");
+        $("#scrollFG").css("bottom", "0px");
+        $("#scrollFG").css("top", "");
+        $("#scrollFG").css("position", "fixed");
+        setUpThumb(scrollbar,30);
+
+        var height = $("#scrollBG").offset().top - ($("#tabs").offset().top + $("#tabs").height());
+        $("#tableDisplay").css("height", height);
+        $("#graphDisplay").css("height", height);
 
         var dataPacing = getDataBetween(runningData.distance, runningData.pacing, 0, runningData.distance.length);
 
@@ -240,7 +268,8 @@
 
         $('#graphDisplay').highcharts({
             chart: {
-                type: 'area'
+                type: 'area',
+                marginBottom: 20
             },
             credits: {
               enabled: false
@@ -315,13 +344,6 @@
             series: seriesData,
             legend: {enabled: false},
         });
-
-        $("#leftButton").show();
-        $("#exitButton").show();
-        var offset = $("#leftButton").offset().left;
-        $("#leftButton").css("bottom", offset);
-        $("#exitButton").css("bottom", offset);
-        $("#exitButton").css("right", offset);
 
         function getDataBetween(dataA, dataB, start, end) {
           var result = [];

@@ -35,7 +35,7 @@
       }
 
       #backButton {
-        position: fixed;
+        margin-bottom: 10px;
         width: 30%;
       }
 
@@ -48,15 +48,15 @@
     <div class="container">
       <div class="row">
         <div class="col-xs-12">
+          <button class="btn btn-lg" id="backButton" onclick="location.href='index.html'">Back</button>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xs-12">
           <table class="table" id="runTable">
             <col width="80%">
             <col width="20%">
           </table>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-xs-3">
-          <button class="btn btn-lg" id="backButton" onclick="location.href='index.html'">Back</button>
         </div>
       </div>
     </div>
@@ -69,7 +69,6 @@
       var currentView = window.name.split("&");
 
       drawTable();
-      $("#backButton").css("bottom", $("#backButton").offset().left);
 
       function drawTable() {
         while (runTable.firstChild) {
