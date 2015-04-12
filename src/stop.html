@@ -190,12 +190,14 @@
 
         setup("stop");
 
-        window.addEventListener("go", function(e) {
+        $(window).on("go", function(e) {
           console.log("in gho event");
+          console.log("go to gho page");
         });
 
-        window.addEventListener("pause", function(e) {
+        $(window).on("pause", function(e) {
           console.log("in pause event");
+          console.log("go to pause page");
         })
         /*
         var scrollbar = drawScrollBar($("#scrollBG").parent().width()*.9, $("#scrollBG").parent().width()*.9/2, 20);
