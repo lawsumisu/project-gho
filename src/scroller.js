@@ -3,10 +3,13 @@ var scrollT = 0;
 
 var cachedWidth = 0;
 var cachedHeight = 0;
+var currentState = "";
 /**
  * Sets up the scroll bar and thumb.
  */
-var setup = function(){
+var setup = function(state){
+	console.log(state);
+	currentState = state;
 	//Update cached dimensions.
 	cachedWidth = $(window).width();
 	cachedHeight = $(window).height();
@@ -18,11 +21,24 @@ var setup = function(){
 	var B = drawScrollBar(w, h, r);
 	setUpThumb(B,r*1.5);
 
+	$("#content").on("go", function(){
+		console.log("Gho!");
+	})
+
+	$("#content").on("pause", function(){
+		console.log("Hold on.");
+	})
+
+	$("#content").on("stop", function(){
+		console.log("Halt!");
+	})
+
+
 	//Add listener for resizing of scroller.
 	$(window).resize(function(){
 		if ($(window).width() != cachedWidth || $(window).height() != cachedHeight){
 			//Only resize if the dimensions have changed between method calls.
-			setup();
+			setup(currentState);
 		}	
 	});
 }
@@ -52,8 +68,7 @@ var drawScrollBar = function(width, height, radius){
     var ctx = canvas.getContext('2d');
 
     ctx.fillStyle = "#DDDDDD";
-    ctx.clearRect(0,0,width, height);  
-    ctx.strokeRect(0,0,width, height);  
+    ctx.clearRect(0,0,width, height);   
     //ctx.fillRect(0,0, scroll.width(), scroll.height());
    	//Draw curved arc.
    	ctx.beginPath();
@@ -96,7 +111,11 @@ var setUpThumb = function(B, radius){
 	var lastY = null;
 	var offsetX = 0;
 	var offsetY = 0;
-	drawThumbAtT(B, scrollT ,radius);
+	var startT = 0;
+	if (currentState == "stop"){
+		startT = 1;
+	}
+	drawThumbAtT(B, startT ,radius);
 
 	var thumbmove = function(e){
 		e.preventDefault();
@@ -187,7 +206,6 @@ var drawSquare = function(x,y){
 var getPixel = function(pixelData, x,y){
 	var i = (Math.floor(y) * pixelData.width + Math.floor(x)) * 4;
 	var data = pixelData.data;
-	console.log(x + "," + y + "," + Math.floor(i));
 	return new Pixel(data[i], data[i+1], data[i+2], data[i+3]);
 }
 
@@ -222,6 +240,7 @@ var drawThumbAtT = function(B, t, radius, isHighlighted){
 	ctx.stroke(); 
 
 	scrollT = t;
+	createEvent(t);
 }
 
 /**
@@ -249,6 +268,25 @@ var animateThumb = function(x, y, B, radius){
 	drawThumbAtT(B,t, radius, false);
 }
 
+var createEvent = function(t){
+	var eventName = "go";
+	var offset = .1;
+	if (t > offset && t < 1-offset){
+		eventName = "pause";
+	}
+	else if (t > 1-offset){
+		eventName = "stop";
+	}
+	if (eventName != currentState){
+		//Only dispatch the event when the state changes.
+		currentState = eventName;
+		var event = new Event(currentState);
+		//Dispatch the event
+		$("#content").trigger(event);
+		//console.log(currentState);
+	}
+	
+}
 /**
  * Clamps a value between a min and a max value.
  * @param  {[float]} value [value to clamp]
