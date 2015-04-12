@@ -8,7 +8,7 @@
     <title>Gho</title>
 
     <link href="external_js/bootstrap-3.3.4-dist/css/bootstrap.min.css" rel="stylesheet">
-    <!--<link href="scroller.css" rel="stylesheet">-->
+    <link href="scroller.css" rel="stylesheet">
 
     <style type="text/css">
       .runningLabel {
@@ -87,6 +87,11 @@
         margin-top: 15px;
       }
 
+      #content {
+        position: fixed;
+        bottom: 0px;
+      }
+
     </style>
   </head>
   <body>
@@ -139,13 +144,11 @@
           </div>
         </div>
       </div>
+    </div>
 
-      <div class="row">
-        <div class="col-xs-12 content">
-          <canvas id="scrollBG" width="200" height="75"></canvas>
-          <canvas id="scrollFG" width="200" height="75"></canvas>
-        </div>
-      </div>
+    <div id="content">
+      <canvas id="scrollBG" width="200" height="75"></canvas>
+      <canvas id="scrollFG" width="200" height="75"></canvas>
     </div>
 
     <script src="external_js/jquery-2.1.3.min.js"></script>
@@ -184,6 +187,17 @@
         $('#totalTimeLabel').text(minutes + ":" + ('0' + seconds).slice(-2));
 
         // set up scrollbar
+
+        setup("stop");
+
+        window.addEventListener("go", function(e) {
+          console.log("in gho event");
+        });
+
+        window.addEventListener("pause", function(e) {
+          console.log("in pause event");
+        })
+        /*
         var scrollbar = drawScrollBar($("#scrollBG").parent().width()*.9, $("#scrollBG").parent().width()*.9/2, 20);
         $("#scrollBG").css("margin-left",$("#scrollBG").parent().width()*.05 + "px");
         $("#scrollFG").css("margin-left",$("#scrollBG").parent().width()*.05 + "px");
@@ -193,6 +207,7 @@
         $("#scrollFG").css("top", "");
         $("#scrollFG").css("position", "fixed");
         setUpThumb(scrollbar,30);
+        */
 
         var height = $("#scrollBG").offset().top - ($("#tabs").offset().top + $("#tabs").height());
         $("#tableDisplay").css("height", height);
