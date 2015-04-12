@@ -1,15 +1,30 @@
 //Javascript for scroll bar here!
 var scrollT = 0;
+
+var cachedWidth = 0;
+var cachedHeight = 0;
 /**
  * Sets up the scroll bar and thumb.
  */
 var setup = function(){
-	console.log($(window).height());
-	var w = $(window).width();
-	var h = $(window).height()/4;
+	//Update cached dimensions.
+	cachedWidth = $(window).width();
+	cachedHeight = $(window).height();
+
+	var w = cachedWidth;
+	var h = cachedHeight/4;	
 	var r= h/8;
+
 	var B = drawScrollBar(w, h, r);
 	setUpThumb(B,r*1.5);
+
+	//Add listener for resizing of scroller.
+	$(window).resize(function(){
+		if ($(window).width() != cachedWidth || $(window).height() != cachedHeight){
+			//Only resize if the dimensions have changed between method calls.
+			setup();
+		}	
+	});
 }
 
 /**
@@ -82,8 +97,9 @@ var setUpThumb = function(B, radius){
 	var lastY = null;
 	var offsetX = 0;
 	var offsetY = 0;
-	drawThumb(0,0,B,radius);
-	var mousemove = function(e){
+	drawThumbAtT(B, scrollT ,radius);
+
+	var thumbmove = function(e){
 		e.preventDefault();
 		var t = e;
 		if (e.originalEvent.touches != null){
@@ -94,7 +110,7 @@ var setUpThumb = function(B, radius){
   		drawThumb(lastX - offsetX, lastY - offsetY, B, radius, true);
   	};
 
-  	var mouseleave = function(e){
+  	var thumbleave = function(e){
   		var t = e;
 		if (e.originalEvent.touches != null){
 			t = e.originalEvent.touches[0];
@@ -104,38 +120,32 @@ var setUpThumb = function(B, radius){
   		drawThumb(lastX, lastY, B, radius, true);
   	};
 
-  	var mouseup = function(e){
+  	var thumbup = function(e){
         scroll.off("mouseleave mousemove touchmove");
         $(this).off("mouseup touchend");
-        // thumb.css("visibility", "visible");
-        // if (lastX != null){
-        // 	setThumb(lastX, lastY);
-        // }
-        // else{
-        // 	setThumb(x-offsetX, y-offsetY);
-        // }
        	animateThumb(lastX-offsetX,lastY-offsetY,B, radius); 
         lastX = null;
 		lastY = null;
   	};
 
-	/*scroll.mousedown(function(e){
-		var data  = document.getElementById("scrollFG").getContext("2d").getImageData(0,0,$("#scrollBG").width(), $("#scrollBG").height()).data;
+  	scroll.off();
+	scroll.mousedown(function(e){
+		var data  = document.getElementById("scrollFG").getContext("2d").getImageData(0,0,$("#scrollBG").width(), $("#scrollBG").height());
 		scroll.css("z-index", 2);
 		var t = e;
-		if (e.touches != null){
+		if (e.originalEvent.touches != null){
 			t = e.touches[0];
 		}
 		var x = t.pageX  - scroll.offset().left;
 	  	var y = t.pageY  - scroll.offset().top;
-	  	var pixel = getPixel(data, scroll.width(), x,y);
+	  	var pixel = getPixel(data, x,y);
 	  	if (pixel.a == 0) return;
-	  	drawThumb(x, y, B, radius);
-		scroll.mousemove(mousemove);
-		scroll.mouseleave(mouseleave);
-		$(window).mouseup(mouseup);
-	});*/
-
+	  	drawThumb(x, y, B, radius, true);
+		scroll.mousemove(thumbmove);
+		scroll.mouseleave(thumbleave);
+		$(window).mouseup(thumbup);
+	});
+	
 	scroll.on("touchstart", function(e){
 		var data  = document.getElementById("scrollFG").getContext("2d").getImageData(0,0,$("#scrollFG").width(), $("#scrollFG").height());
 		scroll.css("z-index", 2);
@@ -152,8 +162,8 @@ var setUpThumb = function(B, radius){
 	  	offsetX = lastX - C.x;
 	  	offsetY = lastY - C.y;
 	  	//Set up listeners for moving and releasing the thumb.
-		scroll.on("touchmove", mousemove);
-		$(window).on("touchend", mouseup);
+		scroll.on("touchmove", thumbmove);
+		$(window).on("touchend", thumbup);
 		//Redraw the thumb in its current position with a highlight.
 		drawThumb(C.x, C.y, B, radius, true);
 	})
@@ -173,7 +183,7 @@ var drawSquare = function(x,y){
  * @param  {[Array]} pixelData [1-D array of pixel data.]
  * @param  {[int]} x         [x-coordinate of pixel location]
  * @param  {[int]} y         [y-coordinate of pixel location]
- * @return {[Pixel]}           [Pixel object if location if valid, undefined otherwise]
+ * @return {[Pixel]}           [Pixel object corresponding to RGBA value at coordinate.]
  */
 var getPixel = function(pixelData, x,y){
 	var i = (Math.floor(y) * pixelData.width + Math.floor(x)) * 4;
